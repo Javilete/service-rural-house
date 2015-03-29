@@ -1,0 +1,13 @@
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 9014
+
+applicationConfig:
+  applicationVersionFilePath:
+  mongodb:
+    url: localhost
+    port: 27017
