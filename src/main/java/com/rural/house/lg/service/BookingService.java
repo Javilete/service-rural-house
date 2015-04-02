@@ -8,5 +8,5 @@ import java.util.List;
 
 public interface BookingService {
 
-    List<AvailableRoomResponse> retrieveRoomAvailability(Timestamp arrivingDate, Timestamp departingDate, Integer guests);
+    List<AvailableRoomResponse> getRoomAvailability(Timestamp arrivingDate, Timestamp departingNight, Integer guests);
 }

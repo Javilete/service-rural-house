@@ -1,17 +1,13 @@
 package com.rural.house.lg.db;
 
 
-import com.mongodb.MongoClient;
-import com.rural.house.lg.config.MongoDbConf;
+import org.bson.Document;
 
-public class BookingDao {
+import java.sql.Timestamp;
+import java.util.List;
 
-    private MongoClient mongoClient;
+public interface BookingDao {
 
-    public BookingDao(MongoDbConf conf){
-        this.mongoClient = new MongoClient(conf.getUrl(), conf.getPort());
-    }
-
-
+    List<Document> getRoomAvailibilityList(Timestamp arrivingDate, Timestamp departingDate);
 
 }
