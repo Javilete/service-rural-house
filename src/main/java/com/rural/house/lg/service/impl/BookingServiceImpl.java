@@ -1,57 +1,143 @@
 package com.rural.house.lg.service.impl;
 
-import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.rural.house.lg.db.BookingDao;
+import com.rural.house.lg.model.Floor;
 import com.rural.house.lg.model.RoomType;
+import com.rural.house.lg.model.defaults.DefaultAvailability;
 import com.rural.house.lg.model.defaults.DefaultAvailableRoomResponse;
+import com.rural.house.lg.model.defaults.DefaultRoom;
+import com.rural.house.lg.model.interfaces.Availability;
 import com.rural.house.lg.model.interfaces.AvailableRoomResponse;
+import com.rural.house.lg.model.interfaces.BookingConfirmation;
+import com.rural.house.lg.model.interfaces.Room;
 import com.rural.house.lg.service.BookingService;
 import org.bson.Document;
+import org.joda.time.DateTime;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Predicate;
 
 public class BookingServiceImpl implements BookingService {
 
-    private static final String ROOM_TYPE_KEY = "roomType";
+    private static Logger LOGGER = LoggerFactory.getLogger(BookingServiceImpl.class);
+
+    private static final Integer MAX_GUESTS = 2;
+
+    private static final String ROOM_TYPE_KEY = "type";
+    private static final String FLOOR_KEY = "floor";
     private static final String GUESTS_KEY = "guests";
+    private static final String DATE_KEY = "date";
 
     private BookingDao bookingDao;
 
-    public BookingServiceImpl(BookingDao bookingDao) {
+    private List<Room> rooms;
+
+    public BookingServiceImpl(BookingDao bookingDao, List<Room> rooms) {
         this.bookingDao = bookingDao;
+        this.rooms = rooms;
     }
 
     @Override
     public List<AvailableRoomResponse> getRoomAvailability(final Timestamp arrivingDate, final Timestamp departingDate, Integer guests) {
 
-        List<Document> availibilityList = bookingDao.getRoomAvailibilityList(arrivingDate, departingDate);
+        List<Document> bookedList = bookingDao.getRoomAvailibilityList(arrivingDate, departingDate);
 
-        return Lists.transform(availibilityList, new Function<Document, AvailableRoomResponse>() {
-            @Nullable
-            @Override
-            public AvailableRoomResponse apply(@Nullable Document input) {
-                return transformDocument(input, arrivingDate, departingDate);
+        //Create availability list
+        Map<Room, AvailableRoomResponse> defaultAvailabilityMap = createDefaultMapOfRoomAvailability(arrivingDate, departingDate);
+
+        if(bookedList.size() > 0){
+            for(Document bookedDoc: bookedList){
+                //Create room object to retrieve
+                Room room = new DefaultRoom(RoomType.valueOf(bookedDoc.getString(ROOM_TYPE_KEY)),
+                        Floor.valueOf(bookedDoc.getString(FLOOR_KEY)));
+                //Get availableRoomResponse object
+                AvailableRoomResponse avr = defaultAvailabilityMap.get(room);
+                //Set corresponding guests in the appropiate date
+                adjustGuestValue(bookedDoc,
+                        avr.getAvailability(),
+                        av -> av.toLocalDate().isEqual(new DateTime(bookedDoc.getDate(DATE_KEY)).toLocalDate()));
             }
-        });
+        }
+
+        return new ArrayList<>(defaultAvailabilityMap.values());
     }
 
-    private AvailableRoomResponse transformDocument(Document input, Timestamp arrivingDate, Timestamp departingDate){
-        AvailableRoomResponse availableRoomResponse = new DefaultAvailableRoomResponse();
-
-        availableRoomResponse.setType(RoomType.valueOf(input.getString(ROOM_TYPE_KEY)));
-        availableRoomResponse.setGuests(input.getInteger(GUESTS_KEY));
-        availableRoomResponse.setDateList(createListOfDates(arrivingDate, departingDate));
-
-        return availableRoomResponse;
+    @Override
+    public void confirmBookingDetails(final List<BookingConfirmation> bookingConfirmation) {
+        bookingDao.saveBooking(bookingConfirmation);
     }
 
-    private List<Timestamp> createListOfDates(Timestamp arrivingDate, Timestamp departingDate){
+    /**
+     *
+     * @param doc               current document from the db search
+     * @param availabilities    default list of availabilities
+     * @param p                 predicate boolean function
+     */
 
-        List<Timestamp> datesList = Lists.newArrayList();
+    private void adjustGuestValue(Document doc, List<Availability> availabilities, Predicate<DateTime> p){
+        for(Availability availabilityObj: availabilities){
+            DateTime dtAv = new DateTime(availabilityObj.getDate());
 
-        return null;
+            if(p.test(dtAv)){
+                availabilityObj.setGuests(availabilityObj.getGuests() - doc.get(GUESTS_KEY,Integer.class));
+            }
+        }
+    }
+
+    /**
+     *
+     * @param arrivingDate  date of arrival for the booking search
+     * @param departingDate date of departing for the booking search
+     * @return              A map having as key {@link Room} objects of the house retrieved from the configuration
+     *                      files and value {@link AvailableRoomResponse} object for each room of the search date
+     *                      provided
+     *
+     */
+
+    private Map<Room, AvailableRoomResponse> createDefaultMapOfRoomAvailability(final Timestamp arrivingDate, final Timestamp departingDate) {
+        Map<Room, AvailableRoomResponse> availabilityDefaultMap = Maps.newHashMap();
+        for(Room room: this.rooms){
+            AvailableRoomResponse availableRoomResponse = new DefaultAvailableRoomResponse();
+            availableRoomResponse.setRoom(room);
+            availableRoomResponse.setAvailability(createListOfAvailability(arrivingDate, departingDate));
+            availabilityDefaultMap.put(room, availableRoomResponse);
+        }
+
+        return availabilityDefaultMap;
+    }
+
+    /**
+     *
+     * Creates a list of {@link com.rural.house.lg.model.interfaces.Availability} objects as default which will contain
+     * the dates between the search was done and as default guest value per each room as 2
+     *
+     * @param arrivingDate  date of arrival for the booking search
+     * @param departingDate date of departing for the booking search
+     * @return              A default list of availability objects with the dates of the search and the default
+     *                      guests set to 2
+     */
+
+    private List<Availability> createListOfAvailability(final Timestamp arrivingDate, final Timestamp departingDate){
+
+        List<Availability> datesList = Lists.newArrayList();
+
+        DateTime start = new DateTime(arrivingDate);
+        while (start.isBefore(departingDate.getTime())){
+            DateTime dt = new DateTime(start);
+            Availability a = new DefaultAvailability();
+            a.setDate(new Timestamp(dt.getMillis()));
+            a.setGuests(MAX_GUESTS);
+            datesList.add(a);
+            start = dt.plusDays(1);
+        }
+
+        return datesList;
     }
 }

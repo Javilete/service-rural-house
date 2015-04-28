@@ -1,6 +1,9 @@
 package com.rural.house.lg.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.rural.house.lg.model.interfaces.Room;
+
+import java.util.List;
 
 public class ApplicationConfig {
 
@@ -9,6 +12,9 @@ public class ApplicationConfig {
 
     @JsonProperty
     private MongoDbConf mongoDbConf;
+
+    @JsonProperty
+    private List<Room> rooms;
 
     public String getApplicationVersionFilePath() {
         return applicationVersionFilePath;
@@ -24,5 +30,13 @@ public class ApplicationConfig {
 
     public void setMongoDbConf(MongoDbConf mongoDbConf) {
         this.mongoDbConf = mongoDbConf;
+    }
+
+    public List<Room> getRooms(){
+        return this.rooms;
+    }
+
+    public void setRooms(List<Room> rooms) {
+        this.rooms = rooms;
     }
 }

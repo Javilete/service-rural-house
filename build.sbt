@@ -13,9 +13,9 @@ scalaVersion := "2.11.6"
 lazy val root = (project in file("."))
 
 libraryDependencies ++= Seq(
-  "org.mongodb" % "mongo-java-driver" % "3.0.0-rc1",
-  "com.google.guava" % "guava" % "18.0",
-  "com.rural.house.lg" % "interface-rural-house" % "0.1.0"
+  "org.mongodb" % "mongo-java-driver" % "3.0.0",
+  "joda-time" % "joda-time" % "2.7",
+  "com.rural.house.lg" % "interface-rural-house" % "0.1.3"
 )
 
 resolvers ++= Seq(

@@ -50,9 +50,19 @@ public class BookingResourceImpl extends BookingResource {
     }
 
     @Override
-    public Response submitReservationImpl(BookingConfirmation bookingConfirmation) {
-        return null;
+    public Response submitReservationImpl(List<BookingConfirmation> bookingConfirmation) {
+
+        try {
+            bookingService.confirmBookingDetails(bookingConfirmation);
+        }catch(Exception e) {
+            LOGGER.debug("Booking service - submitReservation - ERROR: when submiting a booking between: " +
+                    bookingConfirmation.get(0).getDate().toString() + " and "
+                    + bookingConfirmation.get(bookingConfirmation.size() - 1).getDate().toString());
+            throw new WebApplicationException(Response.status(INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorMessage("Error when submiting the booking confirmation"))
+                    .build());
+        }
+
+        return Response.ok().build();
     }
-
-
 }
