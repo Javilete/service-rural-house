@@ -22,7 +22,6 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 public class BookingServiceImpl implements BookingService {
 
@@ -60,9 +59,14 @@ public class BookingServiceImpl implements BookingService {
                 //Get availableRoomResponse object
                 AvailableRoomResponse avr = defaultAvailabilityMap.get(room);
                 //Set corresponding guests in the appropiate date
-                adjustGuestValue(bookedDoc,
-                        avr.getAvailability(),
-                        av -> av.toLocalDate().isEqual(new DateTime(bookedDoc.getDate(DATE_KEY)).toLocalDate()));
+
+                avr.getAvailability().stream()
+                        .filter((av) -> {
+                            DateTime avDateTime = new DateTime(av.getDate());
+                            DateTime bookedDocDateTime = new DateTime(bookedDoc.getDate(DATE_KEY));
+                            return avDateTime.toLocalDate().isEqual(bookedDocDateTime.toLocalDate());
+                        })
+                        .forEach(av -> av.setGuests(av.getGuests() - bookedDoc.get(GUESTS_KEY,Integer.class)));
             }
         }
 
@@ -76,22 +80,8 @@ public class BookingServiceImpl implements BookingService {
 
     /**
      *
-     * @param doc               current document from the db search
-     * @param availabilities    default list of availabilities
-     * @param p                 predicate boolean function
-     */
-
-    private void adjustGuestValue(Document doc, List<Availability> availabilities, Predicate<DateTime> p){
-        for(Availability availabilityObj: availabilities){
-            DateTime dtAv = new DateTime(availabilityObj.getDate());
-
-            if(p.test(dtAv)){
-                availabilityObj.setGuests(availabilityObj.getGuests() - doc.get(GUESTS_KEY,Integer.class));
-            }
-        }
-    }
-
-    /**
+     * Creates a default map of room availability with the default values and between the search
+     * boundary dates
      *
      * @param arrivingDate  date of arrival for the booking search
      * @param departingDate date of departing for the booking search
