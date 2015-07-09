@@ -10,6 +10,11 @@ version := "0.1.0"
 
 scalaVersion := "2.11.6"
 
+assemblyJarName in assembly := "service-rural-house.jar"
+
+// disable using the Scala version in output paths and artifacts
+crossPaths := false
+
 lazy val root = (project in file("."))
 
 libraryDependencies ++= Seq(

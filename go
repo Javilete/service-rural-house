@@ -10,7 +10,7 @@ function outputBuildComment() {
 
 function run_assembly() {
 
-        clean
+        sbt clean compile
 
         outputBuildComment "Building assembly"
         sbt assembly

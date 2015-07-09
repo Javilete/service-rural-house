@@ -48,6 +48,8 @@ public class BookingServiceImpl implements BookingService {
 
         List<Document> bookedList = bookingDao.getRoomAvailibilityList(arrivingDate, departingDate);
 
+
+
         //Create availability list
         Map<Room, AvailableRoomResponse> defaultAvailabilityMap = createDefaultMapOfRoomAvailability(arrivingDate, departingDate);
 
@@ -58,7 +60,6 @@ public class BookingServiceImpl implements BookingService {
                         Floor.valueOf(bookedDoc.getString(FLOOR_KEY)));
                 //Get availableRoomResponse object
                 AvailableRoomResponse avr = defaultAvailabilityMap.get(room);
-                //Set corresponding guests in the appropiate date
 
                 avr.getAvailability().stream()
                         .filter((av) -> {
@@ -67,6 +68,7 @@ public class BookingServiceImpl implements BookingService {
                             return avDateTime.toLocalDate().isEqual(bookedDocDateTime.toLocalDate());
                         })
                         .forEach(av -> av.setGuests(av.getGuests() - bookedDoc.get(GUESTS_KEY,Integer.class)));
+                        //Maybe with map
             }
         }
 
