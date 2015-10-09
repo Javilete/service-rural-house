@@ -23,12 +23,14 @@ import static com.mongodb.client.model.Filters.lte;
 
 public class BookingDaoImpl implements BookingDao {
 
+    private static final String COLLECTION_NAME = "booking";
+
     private MongoDatabase database;
     private MongoCollection<Document> collection;
 
     public BookingDaoImpl(MongoClient mongoClient, MongoDbConf conf){
         this.database= mongoClient.getDatabase(conf.getDatabase());
-        this.collection = database.getCollection(conf.getCollection());
+        this.collection = database.getCollection(COLLECTION_NAME);
     }
 
     public List<Document> getRoomAvailibilityList(Timestamp arrivingDate, Timestamp departingDate){

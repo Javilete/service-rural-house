@@ -12,7 +12,6 @@ applicationConfig:
     url: localhost
     port: 27017
     database: rh
-    collection: booking
   rooms:
   -
     type: TWIN
