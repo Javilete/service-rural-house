@@ -5,31 +5,17 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class MongoDbConf {
 
     @JsonProperty
-    private String url;
-
-    @JsonProperty
-    private Integer port;
+    private String uri;
 
     @JsonProperty
     private String database;
 
-    @JsonProperty
-    private String collection;
-
-    public String getUrl() {
-        return url;
+    public String getUri() {
+        return uri;
     }
 
-    public void setUrl(String url) {
-        this.url = url;
-    }
-
-    public Integer getPort() {
-        return port;
-    }
-
-    public void setPort(Integer port) {
-        this.port = port;
+    public void setUri(String uri) {
+        this.uri = uri;
     }
 
     public String getDatabase() {
@@ -38,13 +24,5 @@ public class MongoDbConf {
 
     public void setDatabase(String database) {
         this.database = database;
-    }
-
-    public String getCollection() {
-        return collection;
-    }
-
-    public void setCollection(String collection) {
-        this.collection = collection;
     }
 }

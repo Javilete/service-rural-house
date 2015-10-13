@@ -9,8 +9,8 @@ server:
 applicationConfig:
   applicationVersionFilePath:
   mongoDbConf:
-    url: localhost
-    port: 27017
+    uri: mongodb://ruralhouse:lasgolondrinas@localhost:27017/?authSource=rh&authMechanism=SCRAM-SHA-1
+#    uri: mongodb://ruralhouse:lasgolondrinas@ds037283.mongolab.com:37283/?authSource=rh&authMechanism=SCRAM-SHA-1
     database: rh
   rooms:
   -

@@ -1,6 +1,8 @@
 package com.rural.house.lg;
 
 import com.mongodb.MongoClient;
+import com.mongodb.MongoClientURI;
+import com.mongodb.client.MongoDatabase;
 import com.rural.house.lg.config.RuralHouseServiceConfiguration;
 import com.rural.house.lg.db.BookingDao;
 import com.rural.house.lg.db.ReviewDao;
@@ -42,15 +44,14 @@ public class RuralHouseServiceApplication extends Application<RuralHouseServiceC
         configureCors(environment);
 
         //DB configuration
-        MongoClient mongoClient = new MongoClient(
-                configuration.getApplicationConfig().getMongoDbConf().getUrl(),
-                configuration.getApplicationConfig().getMongoDbConf().getPort());
+        MongoClientURI connectionString = new MongoClientURI(configuration.getApplicationConfig().getMongoDbConf().getUri());
+        MongoClient mongoClient = new MongoClient(connectionString);
+        MongoDatabase database = mongoClient.getDatabase(configuration.getApplicationConfig().getMongoDbConf().getDatabase());
 
-
-        BookingDao bookingDaoImpl = new BookingDaoImpl(mongoClient, configuration.getApplicationConfig().getMongoDbConf());
+        BookingDao bookingDaoImpl = new BookingDaoImpl(database);
         BookingService bookingServiceImpl = new BookingServiceImpl(bookingDaoImpl, configuration.getApplicationConfig().getRooms());
 
-        ReviewDao reviewDaoImpl = new ReviewDaoImpl(mongoClient, configuration.getApplicationConfig().getMongoDbConf());
+        ReviewDao reviewDaoImpl = new ReviewDaoImpl(database);
         ReviewService reviewServiceImpl = new ReviewServiceImpl(reviewDaoImpl);
 
         environment.healthChecks().register("database", new DatabaseHealthCheck(mongoClient, configuration.getApplicationConfig().getMongoDbConf().getDatabase()));

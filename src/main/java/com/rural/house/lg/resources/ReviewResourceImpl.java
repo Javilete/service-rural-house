@@ -28,7 +28,18 @@ public class ReviewResourceImpl extends ReviewResource{
 
     @Override
     public Response addReviewImpl(Review review) {
-        return null;
+
+        try{
+            reviewService.addReview(review);
+        } catch(Exception e) {
+            LOGGER.debug("Review service - addReview - ERROR: when submiting a review");
+            throw new WebApplicationException(Response.status(INTERNAL_SERVER_ERROR)
+                    .entity(new ErrorMessage("Error when submiting the review"))
+                    .build());
+        }
+
+
+        return Response.ok().build();
     }
 
     @Override
@@ -47,4 +58,5 @@ public class ReviewResourceImpl extends ReviewResource{
 
         return Response.ok().entity(reviews).build();
     }
+
 }
