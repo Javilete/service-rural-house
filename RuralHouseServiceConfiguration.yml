@@ -1,0 +1,30 @@
+server:
+  type: simple
+  applicationContextPath: /
+  adminContextPath: /admin
+  connector:
+    type: http
+    port: 9014
+
+applicationConfig:
+  applicationVersionFilePath:
+  mongoDbConf:
+    uri: mongodb://ruralhouse:lasgolondrinas@localhost:27017/?authSource=rh&authMechanism=SCRAM-SHA-1
+#    uri: mongodb://ruralhouse:lasgolondrinas@ds037283.mongolab.com:37283/?authSource=rh&authMechanism=SCRAM-SHA-1
+    database: rh
+  rooms:
+  -
+    type: TWIN
+    floor: GROUND
+  -
+    type: DOUBLE
+    floor: GROUND
+  -
+    type: TWIN
+    floor: FIRST
+  -
+    type: DOUBLE
+    floor: FIRST
+  -
+    type: SUITE
+    floor: FIRST
