@@ -1,15 +1,15 @@
-package com.rural.house.lg.db;
+package com.rural.house.lg.dao;
 
 
+import com.rural.house.lg.model.Booking;
 import com.rural.house.lg.model.interfaces.BookingConfirmation;
-import org.bson.Document;
 
-import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 
 public interface BookingDao {
 
-    List<Document> getRoomAvailibilityList(Timestamp arrivingDate, Timestamp departingDate);
+    List<Booking> getBookingsFrom(LocalDate arrivalDate, LocalDate departureDate);
 
     void saveBooking(List<BookingConfirmation> bookingConfirmation);
 }

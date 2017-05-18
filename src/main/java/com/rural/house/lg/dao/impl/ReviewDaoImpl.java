@@ -1,10 +1,10 @@
-package com.rural.house.lg.db.impl;
+package com.rural.house.lg.dao.impl;
 
 
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoCursor;
 import com.mongodb.client.MongoDatabase;
-import com.rural.house.lg.db.ReviewDao;
+import com.rural.house.lg.dao.ReviewDao;
 import com.rural.house.lg.model.defaults.DefaultReview;
 import com.rural.house.lg.model.interfaces.Review;
 import org.bson.Document;

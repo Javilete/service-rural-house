@@ -1,11 +1,13 @@
 package com.rural.house.lg.resources;
 
+import com.rural.house.lg.model.Enquiry;
 import com.rural.house.lg.model.interfaces.AvailableRoomResponse;
 import com.rural.house.lg.model.interfaces.BookingConfirmation;
-import com.rural.house.lg.model.interfaces.BookingEnquiry;
+import com.rural.house.lg.model.interfaces.EnquiryRequest;
 import com.rural.house.lg.resource.BookingResource;
 import com.rural.house.lg.service.BookingService;
 import io.dropwizard.jersey.errors.ErrorMessage;
+import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,26 +23,25 @@ public class BookingResourceImpl extends BookingResource {
 
     private static Logger LOGGER = LoggerFactory.getLogger(BookingResourceImpl.class);
 
+    private ModelMapper modelMapper;
     private final BookingService bookingService;
 
-    public BookingResourceImpl(BookingService bookingService) {
+    public BookingResourceImpl(BookingService bookingService, ModelMapper modelMapper) {
         this.bookingService = bookingService;
+        this.modelMapper = modelMapper;
     }
 
     @Override
-    public Response checkReservationImpl(BookingEnquiry bookingEnquiry) {
+    public Response checkReservationImpl(EnquiryRequest bookingEnquiry) {
 
         List<AvailableRoomResponse> availableRoomResponses;
+        Enquiry enquiry = modelMapper.map(bookingEnquiry, Enquiry.class);
 
         try {
-
-            availableRoomResponses = bookingService.getRoomAvailability(
-                    bookingEnquiry.getArrivingDate(),
-                    bookingEnquiry.getDepartingDate(),
-                    bookingEnquiry.getGuests());
-        }catch(Exception e){
+            availableRoomResponses = bookingService.getRoomAvailability(enquiry);
+        } catch (Exception e) {
             LOGGER.debug("Booking service - checkReservation - ERROR: when retriving bookings between the following dates: " +
-                    bookingEnquiry.getArrivingDate().toString() + " and " + bookingEnquiry.getDepartingDate().toString());
+                    bookingEnquiry.getArrivalDate().toString() + " and " + bookingEnquiry.getDepartureDate().toString());
             throw new WebApplicationException(Response.status(INTERNAL_SERVER_ERROR)
                     .entity(new ErrorMessage("Error when trying to get the booking"))
                     .build());
@@ -54,7 +55,7 @@ public class BookingResourceImpl extends BookingResource {
 
         try {
             bookingService.confirmBookingDetails(bookingConfirmation);
-        }catch(Exception e) {
+        } catch (Exception e) {
             LOGGER.debug("Booking service - submitReservation - ERROR: when submiting a booking between: " +
                     bookingConfirmation.get(0).getDate().toString() + " and "
                     + bookingConfirmation.get(bookingConfirmation.size() - 1).getDate().toString());

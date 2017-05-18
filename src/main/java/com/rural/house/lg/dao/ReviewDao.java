@@ -1,4 +1,4 @@
-package com.rural.house.lg.db;
+package com.rural.house.lg.dao;
 
 
 import com.rural.house.lg.model.interfaces.Review;

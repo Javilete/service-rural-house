@@ -1,6 +1,6 @@
 package com.rural.house.lg.service.impl;
 
-import com.rural.house.lg.db.ReviewDao;
+import com.rural.house.lg.dao.ReviewDao;
 import com.rural.house.lg.model.interfaces.Review;
 import com.rural.house.lg.service.ReviewService;
 import org.slf4j.Logger;
